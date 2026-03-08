@@ -1,21 +1,21 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { hasEnvVars } from "../utils";
+import { Database } from "./types";
+
+// Routes that require a logged-in user
+const USER_ROUTES = ["/profile", "/submit", "/submissions"];
+
+// Routes that require admin role
+const ADMIN_ROUTES = ["/admin"];
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  // If the env vars are not set, skip proxy check. You can remove this
-  // once you setup the project.
-  if (!hasEnvVars) {
-    return supabaseResponse;
-  }
-
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
@@ -45,18 +45,38 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: If you remove getClaims() and you use server-side rendering
   // with the Supabase client, your users may be randomly logged out.
   const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  const userClaims = data?.claims;
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    return NextResponse.redirect(url);
+  const pathname = request.nextUrl.pathname;
+
+  // Redirect unauthenticated users away from protected routes
+  const needsAuth =
+    USER_ROUTES.some((route) => pathname.startsWith(route)) ||
+    ADMIN_ROUTES.some((route) => pathname.startsWith(route));
+
+  if (needsAuth && !userClaims) {
+    const redirectUrl = new URL("/login", request.url);
+    redirectUrl.searchParams.set("redirectTo", pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // Redirect non-admins away from /admin pages
+  /*if (ADMIN_ROUTES.some((route) => pathname.startsWith(route)) && userClaims) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", userClaims.user.id)
+      .single();
+
+    if (!profile?.is_admin) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+    */
+
+  // Redirect logged-in users away from login/signup pages
+  if (userClaims && (pathname === "/login" || pathname === "/signup")) {
+    return NextResponse.redirect(new URL("/profile", request.url));
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

@@ -1,5 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
+import { Database } from "./types";
 
 /**
  * Especially important if using Fluid compute: Don't put this client in a
@@ -9,7 +11,7 @@ import { cookies } from "next/headers";
 export async function createClient() {
   const cookieStore = await cookies();
 
-  return createServerClient(
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
@@ -32,3 +34,16 @@ export async function createClient() {
     },
   );
 }
+
+export const createAdminClient = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.SUPABASE_SUPABASE_SECRET_KEY!;
+
+  if (!url || !key) {
+    throw new Error("Missing Supabase secret key credentials.");
+  }
+
+  return createServiceClient<Database>(url, key, {
+    auth: { persistSession: false },
+  });
+};

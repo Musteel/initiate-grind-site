@@ -1,41 +1,46 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import "./globals.css";
-
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+// import { Navbar } from "@/components/layout/Navbar"; TODO: Re-add Navbar after fixing the hydration error
+// import { Footer } from "@/components/layout/Footer"; TODO: Re-add Footer after fixing the hydration error
+import { SupabaseProvider } from "@/lib/supabase/SupabaseProvider";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title: {
+    default: "Initiate Grind — Deadlock Training Platform",
+    template: "%s | Initiate Grind",
+  },
+  description:
+    "Get familiar with Deadlock and enjoy solving community puzzles.",
+  keywords: ["Deadlock", "Deadlock puzzles"],
+  openGraph: {
+    title: "Initiate Grind",
+    description: "The free community-driven puzzle platform for Deadlock.",
+    url: "https://initiategrind.gg",
+    siteName: "Initiate Grind",
+    type: "website",
+  },
+  icons: {
+    icon: "/assets/favicon.ico",
+  },
 };
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  display: "swap",
-  subsets: ["latin"],
-});
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+    <html lang="en" className="dark">
+      <body className="flex flex-col min-h-screen">
+        <SupabaseProvider>
+          {/* <Navbar /> TODO: Re-add Navbar after fixing the hydration error */}
+          <main className="flex-1">
+            {children}
+          </main>
+          {/* <Footer /> TODO: Re-add Footer after fixing the hydration error */}
+        </SupabaseProvider>
       </body>
     </html>
   );
 }
+
