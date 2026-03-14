@@ -11,13 +11,19 @@ export async function Page() {
         redirect("/login");
     }
 
+    if (!user.is_admin) {
+        redirect("/profile");
+    }
+
     return (
         <div className="flex flex-col items-center justify-center h-screen">
-            <h1 className="text-4xl font-bold mb-4">User Profile</h1>
-            <p className="text-lg text-gray-600">This is the user profile page.</p>
+            <h1 className="text-4xl font-bold mb-4">Admin Dashboard</h1>
+            <p className="text-lg text-gray-600">This is the admin dashboard page.</p>
             <p className="text-sm text-gray-500 mt-2">Welcome, {user.email}!</p>
         </div>
     );
 };
 
 export default Page;
+
+

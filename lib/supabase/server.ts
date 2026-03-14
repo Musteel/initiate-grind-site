@@ -44,6 +44,8 @@ export const createAdminClient = () => {
   }
 
   return createServiceClient<Database>(url, key, {
-    auth: { persistSession: false },
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false },
   });
 };

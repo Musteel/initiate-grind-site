@@ -2,95 +2,94 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { Database } from "./types";
 
-// Routes that require a logged-in user
-const USER_ROUTES = ["/profile", "/submit", "/submissions"];
+// Routes that require authentication
+const PROTECTED_ROUTES = [
+  '/dashboard',
+  '/submit',
+  '/settings',
+  '/profile',
+]
 
-// Routes that require admin role
-const ADMIN_ROUTES = ["/admin"];
+// Routes that require moderator or admin role
+// const MODERATOR_ROUTES = ['/admin']
+
+// Routes that are only accessible when NOT logged in
+const AUTH_ROUTES = ['/login', '/signup']
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  let supabaseResponse = NextResponse.next({ request })
 
-  // With Fluid compute, don't put this client in a global environment
-  // variable. Always create a new one on each request.
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll();
+          return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+            request.cookies.set(name, value)
+          )
+          supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
-          );
+            supabaseResponse.cookies.set(name, value, options)
+          )
         },
       },
-    },
-  );
+    }
+  )
 
-  // Do not run code between createServerClient and
-  // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
+  // Refresh session — important for Server Components
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // IMPORTANT: If you remove getClaims() and you use server-side rendering
-  // with the Supabase client, your users may be randomly logged out.
-  const { data } = await supabase.auth.getClaims();
-  const userClaims = data?.claims;
+  const { pathname } = request.nextUrl
 
-  const pathname = request.nextUrl.pathname;
-
-  // Redirect unauthenticated users away from protected routes
-  const needsAuth =
-    USER_ROUTES.some((route) => pathname.startsWith(route)) ||
-    ADMIN_ROUTES.some((route) => pathname.startsWith(route));
-
-  if (needsAuth && !userClaims) {
-    const redirectUrl = new URL("/login", request.url);
-    redirectUrl.searchParams.set("redirectTo", pathname);
-    return NextResponse.redirect(redirectUrl);
+  // Redirect logged-in users away from auth pages
+  if (user && AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // Redirect non-admins away from /admin pages
-  /*if (ADMIN_ROUTES.some((route) => pathname.startsWith(route)) && userClaims) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", userClaims.user.id)
-      .single();
+  // Redirect unauthenticated users away from protected pages
+  if (!user && PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
+    const redirectUrl = new URL('/login', request.url)
+    redirectUrl.searchParams.set('redirectTo', pathname)
+    return NextResponse.redirect(redirectUrl)
+  }
 
-    if (!profile?.is_admin) {
-      return NextResponse.redirect(new URL("/", request.url));
+  // Protect admin routes — requires moderator+ role check
+  if (pathname.startsWith('/admin')) {
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    // Fetch role from profiles
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, banned_at')
+      .eq('id', user.id)
+      .single()
+
+    const isModerator = profile?.role === 'moderator' || profile?.role === 'admin'
+    const isBanned = !!profile?.banned_at
+
+    if (isBanned || !isModerator) {
+      return NextResponse.redirect(new URL('/', request.url))
     }
   }
-    */
 
-  // Redirect logged-in users away from login/signup pages
-  if (userClaims && (pathname === "/login" || pathname === "/signup")) {
-    return NextResponse.redirect(new URL("/profile", request.url));
+  // Redirect banned users to a banned page
+  if (user && !pathname.startsWith('/banned') && !pathname.startsWith('/auth')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('banned_at')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.banned_at) {
+      return NextResponse.redirect(new URL('/banned', request.url))
+    }
   }
 
-  // IMPORTANT: You *must* return the supabaseResponse object as it is.
-  // If you're creating a new response object with NextResponse.next() make sure to:
-  // 1. Pass the request in it, like so:
-  //    const myNewResponse = NextResponse.next({ request })
-  // 2. Copy over the cookies, like so:
-  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-  // 3. Change the myNewResponse object to fit your needs, but avoid changing
-  //    the cookies!
-  // 4. Finally:
-  //    return myNewResponse
-  // If this is not done, you may be causing the browser and server to go out
-  // of sync and terminate the user's session prematurely!
-
-  return supabaseResponse;
+  return supabaseResponse
 }
