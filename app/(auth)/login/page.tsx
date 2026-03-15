@@ -1,11 +1,15 @@
-import { LoginForm } from "@/components/login-form";
+import type { Metadata } from 'next'
+import { AuthForm } from '@/components/auth/auth-form'
 
-export default function Page() {
-  return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <LoginForm />
-      </div>
-    </div>
-  );
+export const metadata: Metadata = {
+  title: 'Sign in',
+}
+
+interface LoginPageProps {
+  searchParams: Promise<{ redirectTo?: string; error?: string }>
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = await searchParams
+  return <AuthForm mode="login" redirectTo={params.redirectTo} />
 }
