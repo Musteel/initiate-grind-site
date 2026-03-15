@@ -31,9 +31,10 @@ export function Navbar({ initialProfile }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = createClient()
+
 
   useEffect(() => {
+    const supabase = createClient()
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (session?.user) {
@@ -49,7 +50,7 @@ export function Navbar({ initialProfile }: NavbarProps) {
       }
     )
     return () => subscription.unsubscribe()
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -64,6 +65,7 @@ export function Navbar({ initialProfile }: NavbarProps) {
   }, [pathname])
 
   const handleSignOut = async () => {
+    const supabase = createClient()
     await supabase.auth.signOut()
     setProfile(null)
     router.push('/')
@@ -219,7 +221,7 @@ export function Navbar({ initialProfile }: NavbarProps) {
         <div className="md:hidden border-t border-white/6 bg-[#0a0b0d]/95 backdrop-blur-md animate-slide-up">
           <div className="max-w-7xl mx-auto px-4 py-4 space-y-1">
             {NAV_LINKS.map(({ href, label, icon: Icon }) => {
-              const active = pathname === href
+              const active = pathname ===  href || pathname.startsWith(href + '/')
               return (
                 <Link
                   key={href}

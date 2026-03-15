@@ -7,6 +7,7 @@ type ButtonVariant = 'brand' | 'secondary' | 'ghost' | 'outline' | 'danger'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  as?: React.ElementType
   variant?: ButtonVariant
   size?: ButtonSize
   loading?: boolean

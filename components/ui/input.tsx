@@ -12,6 +12,11 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, hint, icon, className, id, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-')
+    const describedBy = error
+      ? (inputId ? `${inputId}-error` : undefined)
+      : hint
+        ? (inputId ? `${inputId}-hint` : undefined)
+        : undefined
 
     return (
       <div className="flex flex-col gap-1.5">
@@ -32,6 +37,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={inputId}
+            aria-invalid={Boolean(error) || undefined}
+            aria-describedby={describedBy}
             className={cn(
               'w-full h-10 rounded-lg px-3 text-sm',
               'bg-slate-900 border border-white/8',
@@ -48,8 +55,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
         </div>
-        {error && <p className="text-xs text-red-400">{error}</p>}
-        {hint && !error && <p className="text-xs text-slate-500">{hint}</p>}
+        {error && (
+          <p id={inputId ? `${inputId}-error` : undefined} className="text-xs text-red-400">
+            {error}
+          </p>
+        )}
+        {hint && !error && (
+          <p id={inputId ? `${inputId}-hint` : undefined} className="text-xs text-slate-500">
+            {hint}
+          </p>
+        )}
       </div>
     )
   }
@@ -70,6 +85,11 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ label, error, hint, className, id, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-')
+    const describedBy = error
+      ? (inputId ? `${inputId}-error` : undefined)
+      : hint
+        ? (inputId ? `${inputId}-hint` : undefined)
+        : undefined
 
     return (
       <div className="flex flex-col gap-1.5">
@@ -81,6 +101,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           id={inputId}
+          aria-invalid={Boolean(error) || undefined}
+          aria-describedby={describedBy}
           className={cn(
             'w-full rounded-lg px-3 py-2.5 text-sm min-h-[100px] resize-y',
             'bg-slate-900 border border-white/8',
@@ -94,8 +116,16 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           )}
           {...props}
         />
-        {error && <p className="text-xs text-red-400">{error}</p>}
-        {hint && !error && <p className="text-xs text-slate-500">{hint}</p>}
+        {error && (
+          <p id={inputId ? `${inputId}-error` : undefined} className="text-xs text-red-400">
+            {error}
+          </p>
+        )}
+        {hint && !error && (
+          <p id={inputId ? `${inputId}-hint` : undefined} className="text-xs text-slate-500">
+            {hint}
+          </p>
+        )}
       </div>
     )
   }

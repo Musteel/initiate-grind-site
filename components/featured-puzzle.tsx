@@ -1,5 +1,6 @@
-import { createClient } from "@/lib/supabase/client"
-import { ArrowRight, ChevronRight, Link } from "lucide-react"
+import { createClient } from "@/lib/supabase/server"
+import Link from "next/link"
+import { ArrowRight, ChevronRight } from "lucide-react"
 import { DifficultyBadge } from "@/components/ui/badge"
 import { Flame, Users, Zap } from "lucide-react"
 import { formatNumber } from "@/lib/utils"
@@ -59,7 +60,7 @@ export default async function FeaturedPuzzles() {
                       {puzzle.title}
                     </h3>
                     <p className="text-xs text-slate-600 mb-4">
-                      by {puzzle.profiles?.display_name ?? puzzle.profiles?.username}
+                      by {puzzle.profiles?.display_name ?? puzzle.profiles?.username ?? 'Unknown'}
                     </p>
                     <div className="flex items-center gap-4 text-xs text-slate-600">
                       <span className="flex items-center gap-1">

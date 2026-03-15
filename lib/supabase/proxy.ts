@@ -19,6 +19,14 @@ const AUTH_ROUTES = ['/login', '/signup']
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
+  const redirectWithCookies = (url: URL) => {
+    const response = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach(({ name, value, ...options }) => {
+      response.cookies.set(name, value, options)
+    })
+    return response
+  }
+
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
@@ -28,13 +36,13 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
+          cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value)
-          )
+          })
           supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value, options }) => {
             supabaseResponse.cookies.set(name, value, options)
-          )
+          })
         },
       },
     }
@@ -47,20 +55,20 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect logged-in users away from auth pages
   if (user && AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return redirectWithCookies(new URL('/dashboard', request.url))
   }
 
   // Redirect unauthenticated users away from protected pages
   if (!user && PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
     const redirectUrl = new URL('/login', request.url)
     redirectUrl.searchParams.set('redirectTo', pathname)
-    return NextResponse.redirect(redirectUrl)
+    return redirectWithCookies(redirectUrl)
   }
 
   // Protect admin routes — requires moderator+ role check
   if (pathname.startsWith('/admin')) {
     if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      return redirectWithCookies(new URL('/login', request.url))
     }
 
     // Fetch role from profiles
@@ -74,7 +82,7 @@ export async function updateSession(request: NextRequest) {
     const isBanned = !!profile?.banned_at
 
     if (isBanned || !isModerator) {
-      return NextResponse.redirect(new URL('/', request.url))
+      return redirectWithCookies(new URL('/', request.url))
     }
   }
 
@@ -87,7 +95,7 @@ export async function updateSession(request: NextRequest) {
       .single()
 
     if (profile?.banned_at) {
-      return NextResponse.redirect(new URL('/banned', request.url))
+      return redirectWithCookies(new URL('/banned', request.url))
     }
   }
 

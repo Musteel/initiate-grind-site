@@ -1,17 +1,15 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { fetchUserProfile } from "@/lib/utils";
+
 
 export async function Page() {
-    const supabase = await createClient();
-    // You can also use getUser() which will be slower.
-    const { data } = await supabase.auth.getClaims();
-    const user = data?.claims;
+    const profile = await fetchUserProfile();
 
-    if (!user) {
+    if (!profile) {
         redirect("/login");
     }
 
-    if (!user.is_admin) {
+    if (profile.role !== "admin" && profile.role !== "moderator") {
         redirect("/profile");
     }
 
@@ -19,7 +17,6 @@ export async function Page() {
         <div className="flex flex-col items-center justify-center h-screen">
             <h1 className="text-4xl font-bold mb-4">Admin Dashboard</h1>
             <p className="text-lg text-gray-600">This is the admin dashboard page.</p>
-            <p className="text-sm text-gray-500 mt-2">Welcome, {user.email}!</p>
         </div>
     );
 };

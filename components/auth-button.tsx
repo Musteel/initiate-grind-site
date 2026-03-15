@@ -20,12 +20,16 @@ export async function AuthButton() {
     </div>
   ) : (
     <div className="flex gap-2">
-      <Button size="sm" variant={"outline"}>
-        <Link href="/login">Sign in</Link>
-      </Button>
-      <Button size="sm" variant={"brand"}>
-        <Link href="/signup">Sign up</Link>
-      </Button>
+      <Link href="/login">
+        <Button size="sm" variant={"outline"}>
+          Sign in
+        </Button>
+      </Link>
+      <Link href="/signup">
+        <Button size="sm" variant={"brand"}>
+          Sign up
+        </Button>
+      </Link>
     </div>
   );
 }

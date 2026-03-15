@@ -17,12 +17,12 @@ interface BadgeProps {
 
 const badgeVariants: Record<BadgeVariant, string> = {
   default: 'bg-slate-800 text-slate-300 border border-white/8',
-  brand:   'bg-amber-500/15 text-amber-400 border border-amber-500/25',
+  brand: 'bg-amber-500/15 text-amber-400 border border-amber-500/25',
   success: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25',
   warning: 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/25',
-  danger:  'bg-red-500/15 text-red-400 border border-red-500/25',
-  info:    'bg-sky-500/15 text-sky-400 border border-sky-500/25',
-  ghost:   'bg-white/5 text-slate-400 border border-white/6',
+  danger: 'bg-red-500/15 text-red-400 border border-red-500/25',
+  info: 'bg-sky-500/15 text-sky-400 border border-sky-500/25',
+  ghost: 'bg-white/5 text-slate-400 border border-white/6',
 }
 
 export function Badge({ children, variant = 'default', size = 'md', className }: BadgeProps) {
@@ -89,8 +89,8 @@ export function DifficultyBadge({
 
 const gamePhaseConfig: Record<GamePhase, { label: string; className: string }> = {
   early: { label: 'Early game', className: 'bg-sky-500/12 text-sky-400 border border-sky-500/20' },
-  mid:   { label: 'Mid game',   className: 'bg-violet-500/12 text-violet-400 border border-violet-500/20' },
-  late:  { label: 'Late game',  className: 'bg-orange-500/12 text-orange-400 border border-orange-500/20' },
+  mid: { label: 'Mid game', className: 'bg-violet-500/12 text-violet-400 border border-violet-500/20' },
+  late: { label: 'Late game', className: 'bg-orange-500/12 text-orange-400 border border-orange-500/20' },
 }
 
 export function GamePhaseBadge({ phase }: { phase: GamePhase }) {
@@ -122,9 +122,10 @@ const avatarSizes = {
 }
 
 export function Avatar({ src, name, size = 'md', className }: AvatarProps) {
-  const fallback = name
-    ? name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
-    : '?'
+  const initials = name?.trim()
+    ? name.trim().split(' ').map((n) => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
+    : ''
+  const fallback = initials || '?'
 
   return (
     <span

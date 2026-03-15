@@ -4,9 +4,9 @@ import { formatNumber } from "@/lib/utils"
 export default async function StatsSection() {
     const supabase = await createClient()
     const [puzzlesRes, attemptsRes, profilesRes] = await Promise.all([
-        supabase.from('puzzles').select('id', { count: 'exact' }).eq('status', 'approved'),
-        supabase.from('puzzle_attempts').select('id', { count: 'exact' }),
-        supabase.from('profiles').select('id', { count: 'exact' }),
+        supabase.from('puzzles').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
+        supabase.from('puzzle_attempts').select('id', { count: 'exact', head: true }),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }),
     ])
     const stats = {
         puzzles: puzzlesRes.count ?? 0,
