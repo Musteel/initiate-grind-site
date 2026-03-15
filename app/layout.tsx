@@ -1,46 +1,49 @@
-import type { Metadata } from "next";
-import "./globals.css";
-// import { Navbar } from "@/components/layout/Navbar"; TODO: Re-add Navbar after fixing the hydration error
-// import { Footer } from "@/components/layout/Footer"; TODO: Re-add Footer after fixing the hydration error
-import { SupabaseProvider } from "@/lib/supabase/SupabaseProvider";
+import type { Metadata, Viewport } from 'next'
+import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: "Initiate Grind — Deadlock Training Platform",
-    template: "%s | Initiate Grind",
+    default: 'Deadlock Trainer',
+    template: '%s · Deadlock Trainer',
   },
   description:
-    "Get familiar with Deadlock and enjoy solving community puzzles.",
-  keywords: ["Deadlock", "Deadlock puzzles"],
+    'Improve your Deadlock gameplay through interactive video puzzles. Watch real game situations, make decisions, and learn from the outcomes.',
+  keywords: ['Deadlock', 'MOBA', 'trainer', 'puzzles', 'gameplay', 'esports', 'Valve'],
+  authors: [{ name: 'Deadlock Trainer' }],
   openGraph: {
-    title: "Initiate Grind",
-    description: "The free community-driven puzzle platform for Deadlock.",
-    url: "https://initiategrind.gg",
-    siteName: "Initiate Grind",
-    type: "website",
+    title: 'Deadlock Trainer',
+    description: 'Improve your Deadlock gameplay through interactive video puzzles.',
+    type: 'website',
+    locale: 'en_US',
   },
-  icons: {
-    icon: "/assets/favicon.ico",
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Deadlock Trainer',
+    description: 'Improve your Deadlock gameplay through interactive video puzzles.',
   },
-};
+  robots: {
+    index: true,
+    follow: true,
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#0a0b0d',
+  colorScheme: 'dark',
+  width: 'device-width',
+  initialScale: 1,
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="flex flex-col min-h-screen">
-        <SupabaseProvider>
-          {/* <Navbar /> TODO: Re-add Navbar after fixing the hydration error */}
-          <main className="flex-1">
-            {children}
-          </main>
-          {/* <Footer /> TODO: Re-add Footer after fixing the hydration error */}
-        </SupabaseProvider>
+      <body className="antialiased">
+        {children}
       </body>
     </html>
-  );
+  )
 }
-
