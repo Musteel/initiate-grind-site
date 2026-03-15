@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { fetchUserProfile } from "@/lib/utils";
+import { fetchUserProfile } from "@/lib/supabase/server";
 
 
 export async function Page() {
