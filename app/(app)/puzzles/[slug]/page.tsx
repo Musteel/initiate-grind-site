@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { PuzzleSolver } from '@/components/puzzle/puzzle-solver'
 import { PuzzleSidebar } from '@/components/puzzle/puzzle-sidebar'
 import { DifficultyBadge, GamePhaseBadge } from '@/components/ui/badge'
-import type { PuzzleWithDetails } from '@/lib/supabase/types'
+import type { PuzzleWithDetails } from '@/lib/supabase/index'
 
 interface PageProps {
   params: Promise<{ slug: string }>

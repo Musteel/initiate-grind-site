@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import type { DifficultyLevel, GamePhase } from '@/lib/supabase/types';
+import type { DifficultyLevel, GamePhase } from '@/lib/supabase';
 
 // ============================================================
 // Generic Badge

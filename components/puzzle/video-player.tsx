@@ -4,7 +4,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { Play, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { VideoSourceType } from '@/lib/supabase/types'
+import type { VideoSourceType } from '@/lib/supabase'
 
 interface VideoPlayerProps {
   sourceType: VideoSourceType

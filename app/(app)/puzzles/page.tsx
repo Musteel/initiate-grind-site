@@ -5,7 +5,7 @@ import { Search, Flame, Users, Heart, ArrowRight, SlidersHorizontal } from 'luci
 import { createClient } from '@/lib/supabase/server'
 import { DifficultyBadge, GamePhaseBadge, Badge } from '@/components/ui/badge'
 import { formatNumber, PAGE_SIZE, getPaginationRange } from '@/lib/utils'
-import type { DifficultyLevel, GamePhase } from '@/lib/supabase/types'
+import type { DifficultyLevel, GamePhase } from '@/lib/supabase/index'
 
 export const metadata: Metadata = { title: 'Puzzles' }
 
