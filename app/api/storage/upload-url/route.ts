@@ -21,15 +21,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const { filename, contentType, fileSize } = body as {
-      filename:    string
-      contentType: string
-      fileSize:    number
+    // Parse and validate request body
+    let body: any
+    try {
+      body = await request.json()
+    } catch (parseError) {
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
     }
 
-    if (!filename || !contentType || !fileSize) {
-      return NextResponse.json({ error: 'Missing filename, contentType or fileSize' }, { status: 400 })
+    const { filename, contentType, fileSize } = body
+
+    // Validate filename
+    if (typeof filename !== 'string' || filename.trim() === '') {
+      return NextResponse.json({ error: 'filename must be a non-empty string' }, { status: 400 })
+    }
+
+    // Validate contentType
+    if (typeof contentType !== 'string' || contentType.trim() === '') {
+      return NextResponse.json({ error: 'contentType must be a non-empty string' }, { status: 400 })
+    }
+
+    // Validate fileSize
+    if (!Number.isFinite(fileSize) || fileSize <= 0) {
+      return NextResponse.json({ error: 'fileSize must be a finite positive number' }, { status: 400 })
     }
 
     if (!ALLOWED_TYPES.includes(contentType)) {

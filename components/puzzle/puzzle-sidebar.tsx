@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Avatar, DifficultyBadge, GamePhaseBadge, LevelBadge, Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn, formatNumber, formatRelativeTime } from '@/lib/utils'
-import type { PuzzleWithDetails } from '@/lib/supabase/types'
+import type { PuzzleWithDetails } from '@/lib/supabase'
 
 interface PuzzleSidebarProps {
   puzzle: PuzzleWithDetails

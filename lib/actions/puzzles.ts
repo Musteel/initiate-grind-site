@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { PuzzleCreateInput } from '@/lib/supabase/types'
+import type { PuzzleCreateInput } from '@/lib/supabase'
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -178,12 +178,21 @@ export async function updatePuzzle(
 
         // Replace tags if provided
         if (input.hero_tags !== undefined || input.mechanic_tags !== undefined) {
-            await admin.from('puzzle_tags').delete().eq('puzzle_id', puzzleId)
+            const { error: deleteTagsError } = await admin.from('puzzle_tags').delete().eq('puzzle_id', puzzleId)
+            if (deleteTagsError) {
+                return { success: false, error: deleteTagsError.message }
+            }
+
             const tags = [
                 ...(input.hero_tags ?? []).map((v) => ({ puzzle_id: puzzleId, tag_type: 'hero' as const, tag_value: v })),
                 ...(input.mechanic_tags ?? []).map((v) => ({ puzzle_id: puzzleId, tag_type: 'mechanic' as const, tag_value: v })),
             ]
-            if (tags.length > 0) await admin.from('puzzle_tags').insert(tags)
+            if (tags.length > 0) {
+                const { error: insertTagsError } = await admin.from('puzzle_tags').insert(tags)
+                if (insertTagsError) {
+                    return { success: false, error: insertTagsError.message }
+                }
+            }
         }
 
         revalidatePath(`/submissions`)
@@ -236,10 +245,15 @@ export async function submitPuzzleForReview(
         const isTrusted = ['trusted_creator', 'moderator', 'admin'].includes(profile?.role ?? '')
         const newStatus = isTrusted ? 'pending_review' : 'pending_vote'
 
-        await admin
+        const { error: updateError } = await admin
             .from('puzzles')
             .update({ status: newStatus, rejection_reason: null })
             .eq('id', puzzleId)
+
+        if (updateError) {
+            console.error(`[submitPuzzleForReview] Failed to update puzzle ${puzzleId} to status ${newStatus}:`, updateError)
+            return { success: false, error: updateError.message }
+        }
 
         revalidatePath('/submissions')
         revalidatePath('/admin/submissions')
@@ -272,7 +286,12 @@ export async function deleteDraftPuzzle(
         if (puzzle.creator_id !== user.id) return { success: false, error: 'Not your puzzle' }
         if (puzzle.status !== 'draft') return { success: false, error: 'Only drafts can be deleted' }
 
-        await admin.from('puzzles').delete().eq('id', puzzleId)
+        const { error: deleteError } = await admin.from('puzzles').delete().eq('id', puzzleId)
+        if (deleteError) {
+            console.error(`[deleteDraftPuzzle] Failed to delete puzzle ${puzzleId}:`, deleteError)
+            return { success: false, error: deleteError.message }
+        }
+
         revalidatePath('/submissions')
         return { success: true }
     } catch (err: any) {
@@ -312,12 +331,20 @@ export async function togglePuzzleVote(
             .maybeSingle()
 
         if (existing) {
-            await supabase.from('puzzle_votes').delete()
+            const { error: deleteError } = await supabase.from('puzzle_votes').delete()
                 .eq('puzzle_id', puzzleId).eq('user_id', user.id)
+            if (deleteError) {
+                console.error(`[togglePuzzleVote] Failed to delete vote for puzzle ${puzzleId}:`, deleteError)
+                return { success: false, voted: true, error: deleteError.message }
+            }
             revalidatePath('/submissions')
             return { success: true, voted: false }
         } else {
-            await supabase.from('puzzle_votes').insert({ puzzle_id: puzzleId, user_id: user.id })
+            const { error: insertError } = await supabase.from('puzzle_votes').insert({ puzzle_id: puzzleId, user_id: user.id })
+            if (insertError) {
+                console.error(`[togglePuzzleVote] Failed to insert vote for puzzle ${puzzleId}:`, insertError)
+                return { success: false, voted: false, error: insertError.message }
+            }
             revalidatePath('/submissions')
             return { success: true, voted: true }
         }

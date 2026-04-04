@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { DifficultyBadge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { recordPuzzleAttempt } from '@/lib/actions/xp'
-import type { PuzzleWithDetails } from '@/lib/supabase/types'
+import type { PuzzleWithDetails } from '@/lib/supabase'
 
 type SolvePhase =
   | 'watching'     // intro clip playing
