@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { DifficultyLevel, GamePhase } from "./supabase/types";
+import { DifficultyLevel } from "./supabase";
+import { GamePhase } from "./supabase";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

@@ -1,12 +1,11 @@
-// app/(app)/puzzle-of-the-day/page.tsx
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+//import { notFound } from 'next/navigation'
 import { Flame, Calendar, Zap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { PuzzleSolver } from '@/components/puzzle/puzzle-solver'
 import { PuzzleSidebar } from '@/components/puzzle/puzzle-sidebar'
 import { DifficultyBadge } from '@/components/ui/badge'
-import type { PuzzleWithDetails } from '@/lib/supabase/types'
+import type { PuzzleWithDetails } from '@/lib/supabase'
 
 export const metadata: Metadata = { title: 'Puzzle of the Day' }
 

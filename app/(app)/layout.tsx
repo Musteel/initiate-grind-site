@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import Link from 'next/link'
 import { FooterCopyright } from '@/components/layout/FooterCopyright'
 import { Navbar } from '@/components/layout/Navbar'
 import { createClient } from '@/lib/supabase/server'
@@ -24,9 +25,9 @@ export default async function AppLayout({
             </Suspense>
           </p>
           <div className="flex items-center gap-6 text-sm text-slate-600">
-            <a href="/puzzles" className="hover:text-slate-400 transition-colors">Puzzles</a>
-            <a href="/leaderboard" className="hover:text-slate-400 transition-colors">Leaderboard</a>
-            <a href="/submit" className="hover:text-slate-400 transition-colors">Submit</a>
+            <Link href="/puzzles" className="hover:text-slate-400 transition-colors">Puzzles</Link>
+            <Link href="/leaderboard" className="hover:text-slate-400 transition-colors">Leaderboard</Link>
+            <Link href="/submit" className="hover:text-slate-400 transition-colors">Submit</Link>
           </div>
         </div>
       </footer>

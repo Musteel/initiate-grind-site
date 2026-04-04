@@ -1,6 +1,6 @@
 // Convenience types used throughout the application
 
-import type { Database } from './types'
+import type { Database } from './types';
 
 // ============================================================
 // Row aliases
@@ -21,15 +21,10 @@ export type XpLog         = Database['public']['Tables']['xp_log']['Row']
 // Enum re-exports
 // ============================================================
 
-export type {
-  UserRole,
-  PuzzleStatus,
-  DifficultyLevel,
-  GamePhase,
-  VideoSourceType,
-  TagType,
-  ReportStatus,
-} from './types'
+export type DifficultyLevel = Database['public']['Enums']['difficulty_level']
+export type GamePhase       = Database['public']['Enums']['game_phase']
+export type VideoSourceType       = Database['public']['Enums']['video_source_type']
+export type PuzzleStatus     = Database['public']['Enums']['puzzle_status']
 
 // ============================================================
 // Enriched / joined types (used in UI)
