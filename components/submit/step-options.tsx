@@ -10,7 +10,7 @@ import { VideoSourcePicker } from './video-source-picker'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useEditor, makeOption } from './editor-context'
-import type { VideoSourceType } from '@/types'
+import type { VideoSourceType } from '@/lib/supabase'
 
 export function StepOptions() {
   const { state, dispatch, goToStep, isStep3Valid } = useEditor()

@@ -119,21 +119,8 @@ export async function updatePuzzle(
 
         const admin = createAdminClient()
 
-        // Verify ownership and editable status
-        const { data: existing } = await admin
-            .from('puzzles')
-            .select('id, creator_id, status')
-            .eq('id', puzzleId)
-            .single()
-
-        if (!existing) return { success: false, error: 'Puzzle not found' }
-        if (existing.creator_id !== user.id) return { success: false, error: 'Not your puzzle' }
-        if (!['draft', 'rejected'].includes(existing.status)) {
-            return { success: false, error: 'Puzzle cannot be edited in its current state' }
-        }
-
-        // Update puzzle fields
-        const { error: updateError } = await admin
+        // Update puzzle fields with guarded write (checks ownership and status in one operation)
+        const { data: updated, error: updateError } = await admin
             .from('puzzles')
             .update({
                 ...(input.title !== undefined && { title: input.title }),
@@ -149,8 +136,14 @@ export async function updatePuzzle(
                 ...(input.explanation !== undefined && { explanation: input.explanation }),
             })
             .eq('id', puzzleId)
+            .eq('creator_id', user.id)
+            .in('status', ['draft', 'rejected'])
+            .select('id')
 
         if (updateError) return { success: false, error: updateError.message }
+        if (!updated || updated.length === 0) {
+            return { success: false, error: 'Puzzle not found, not owned by you, or cannot be edited in its current state' }
+        }
 
         // Replace options if provided
         if (input.options) {
@@ -176,21 +169,45 @@ export async function updatePuzzle(
             }
         }
 
-        // Replace tags if provided
-        if (input.hero_tags !== undefined || input.mechanic_tags !== undefined) {
-            const { error: deleteTagsError } = await admin.from('puzzle_tags').delete().eq('puzzle_id', puzzleId)
-            if (deleteTagsError) {
-                return { success: false, error: deleteTagsError.message }
+        // Replace tags if provided (only replace the specific tag type that's being updated)
+        if (input.hero_tags !== undefined) {
+            // Delete only hero tags
+            const { error: deleteHeroTagsError } = await admin
+                .from('puzzle_tags')
+                .delete()
+                .eq('puzzle_id', puzzleId)
+                .eq('tag_type', 'hero')
+            if (deleteHeroTagsError) {
+                return { success: false, error: deleteHeroTagsError.message }
             }
 
-            const tags = [
-                ...(input.hero_tags ?? []).map((v) => ({ puzzle_id: puzzleId, tag_type: 'hero' as const, tag_value: v })),
-                ...(input.mechanic_tags ?? []).map((v) => ({ puzzle_id: puzzleId, tag_type: 'mechanic' as const, tag_value: v })),
-            ]
-            if (tags.length > 0) {
-                const { error: insertTagsError } = await admin.from('puzzle_tags').insert(tags)
-                if (insertTagsError) {
-                    return { success: false, error: insertTagsError.message }
+            // Insert new hero tags
+            if (input.hero_tags.length > 0) {
+                const heroTags = input.hero_tags.map((v) => ({ puzzle_id: puzzleId, tag_type: 'hero' as const, tag_value: v }))
+                const { error: insertHeroTagsError } = await admin.from('puzzle_tags').insert(heroTags)
+                if (insertHeroTagsError) {
+                    return { success: false, error: insertHeroTagsError.message }
+                }
+            }
+        }
+
+        if (input.mechanic_tags !== undefined) {
+            // Delete only mechanic tags
+            const { error: deleteMechanicTagsError } = await admin
+                .from('puzzle_tags')
+                .delete()
+                .eq('puzzle_id', puzzleId)
+                .eq('tag_type', 'mechanic')
+            if (deleteMechanicTagsError) {
+                return { success: false, error: deleteMechanicTagsError.message }
+            }
+
+            // Insert new mechanic tags
+            if (input.mechanic_tags.length > 0) {
+                const mechanicTags = input.mechanic_tags.map((v) => ({ puzzle_id: puzzleId, tag_type: 'mechanic' as const, tag_value: v }))
+                const { error: insertMechanicTagsError } = await admin.from('puzzle_tags').insert(mechanicTags)
+                if (insertMechanicTagsError) {
+                    return { success: false, error: insertMechanicTagsError.message }
                 }
             }
         }
@@ -222,17 +239,14 @@ export async function submitPuzzleForReview(
             .eq('id', user.id)
             .single()
 
+        // Fetch puzzle with options for validation (read-only, not for ownership check)
         const { data: puzzle } = await admin
             .from('puzzles')
-            .select('id, creator_id, status, title, options:puzzle_options(id, is_correct)')
+            .select('id, options:puzzle_options(id, is_correct)')
             .eq('id', puzzleId)
             .single()
 
         if (!puzzle) return { success: false, error: 'Puzzle not found' }
-        if ((puzzle as any).creator_id !== user.id) return { success: false, error: 'Not your puzzle' }
-        if (!['draft', 'rejected'].includes((puzzle as any).status)) {
-            return { success: false, error: 'Puzzle is already submitted' }
-        }
 
         // Validate: must have at least one correct option
         const options = (puzzle as any).options ?? []
@@ -245,14 +259,21 @@ export async function submitPuzzleForReview(
         const isTrusted = ['trusted_creator', 'moderator', 'admin'].includes(profile?.role ?? '')
         const newStatus = isTrusted ? 'pending_review' : 'pending_vote'
 
-        const { error: updateError } = await admin
+        // Guarded write: only update if owned by user and in draft/rejected status
+        const { data: updated, error: updateError } = await admin
             .from('puzzles')
             .update({ status: newStatus, rejection_reason: null })
             .eq('id', puzzleId)
+            .eq('creator_id', user.id)
+            .in('status', ['draft', 'rejected'])
+            .select('id')
 
         if (updateError) {
             console.error(`[submitPuzzleForReview] Failed to update puzzle ${puzzleId} to status ${newStatus}:`, updateError)
             return { success: false, error: updateError.message }
+        }
+        if (!updated || updated.length === 0) {
+            return { success: false, error: 'Puzzle not found, not owned by you, or already submitted' }
         }
 
         revalidatePath('/submissions')
@@ -276,20 +297,22 @@ export async function deleteDraftPuzzle(
         if (!user) return { success: false, error: 'Not authenticated' }
 
         const admin = createAdminClient()
-        const { data: puzzle } = await admin
+
+        // Guarded delete: only delete if owned by user and in draft status
+        const { data: deleted, error: deleteError } = await admin
             .from('puzzles')
-            .select('creator_id, status')
+            .delete()
             .eq('id', puzzleId)
-            .single()
+            .eq('creator_id', user.id)
+            .eq('status', 'draft')
+            .select('id')
 
-        if (!puzzle) return { success: false, error: 'Not found' }
-        if (puzzle.creator_id !== user.id) return { success: false, error: 'Not your puzzle' }
-        if (puzzle.status !== 'draft') return { success: false, error: 'Only drafts can be deleted' }
-
-        const { error: deleteError } = await admin.from('puzzles').delete().eq('id', puzzleId)
         if (deleteError) {
             console.error(`[deleteDraftPuzzle] Failed to delete puzzle ${puzzleId}:`, deleteError)
             return { success: false, error: deleteError.message }
+        }
+        if (!deleted || deleted.length === 0) {
+            return { success: false, error: 'Puzzle not found, not owned by you, or only drafts can be deleted' }
         }
 
         revalidatePath('/submissions')
@@ -322,32 +345,35 @@ export async function togglePuzzleVote(
             return { success: false, voted: false, error: 'Puzzle is not available for voting' }
         }
 
-        // Check existing vote
-        const { data: existing } = await supabase
+        // Try to insert vote first (optimistic approach)
+        const { error: insertError } = await supabase
             .from('puzzle_votes')
-            .select('puzzle_id')
-            .eq('puzzle_id', puzzleId)
-            .eq('user_id', user.id)
-            .maybeSingle()
+            .insert({ puzzle_id: puzzleId, user_id: user.id })
 
-        if (existing) {
-            const { error: deleteError } = await supabase.from('puzzle_votes').delete()
-                .eq('puzzle_id', puzzleId).eq('user_id', user.id)
-            if (deleteError) {
-                console.error(`[togglePuzzleVote] Failed to delete vote for puzzle ${puzzleId}:`, deleteError)
-                return { success: false, voted: true, error: deleteError.message }
+        if (insertError) {
+            // Check if it's a unique constraint violation (user already voted)
+            if (insertError.code === '23505' || insertError.message?.includes('duplicate') || insertError.message?.includes('unique')) {
+                // Already voted, so remove the vote instead
+                const { error: deleteError } = await supabase
+                    .from('puzzle_votes')
+                    .delete()
+                    .eq('puzzle_id', puzzleId)
+                    .eq('user_id', user.id)
+                if (deleteError) {
+                    console.error(`[togglePuzzleVote] Failed to delete vote for puzzle ${puzzleId}:`, deleteError)
+                    return { success: false, voted: true, error: deleteError.message }
+                }
+                revalidatePath('/submissions')
+                return { success: true, voted: false }
             }
-            revalidatePath('/submissions')
-            return { success: true, voted: false }
-        } else {
-            const { error: insertError } = await supabase.from('puzzle_votes').insert({ puzzle_id: puzzleId, user_id: user.id })
-            if (insertError) {
-                console.error(`[togglePuzzleVote] Failed to insert vote for puzzle ${puzzleId}:`, insertError)
-                return { success: false, voted: false, error: insertError.message }
-            }
-            revalidatePath('/submissions')
-            return { success: true, voted: true }
+            // Other error
+            console.error(`[togglePuzzleVote] Failed to insert vote for puzzle ${puzzleId}:`, insertError)
+            return { success: false, voted: false, error: insertError.message }
         }
+
+        // Successfully inserted vote
+        revalidatePath('/submissions')
+        return { success: true, voted: true }
     } catch (err: any) {
         return { success: false, voted: false, error: err?.message ?? 'Unknown error' }
     }

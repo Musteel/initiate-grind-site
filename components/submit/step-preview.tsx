@@ -13,7 +13,7 @@ import { DifficultyBadge, GamePhaseBadge, Badge } from '@/components/ui/badge'
 import { cn, formatSeconds } from '@/lib/utils'
 import { useEditor } from './editor-context'
 import { createDraftPuzzle, updatePuzzle, submitPuzzleForReview } from '@/lib/actions/puzzles'
-import type { VideoSourceType } from '@/types'
+import type { VideoSourceType } from '@/lib/supabase'
 
 export function StepPreview() {
   const { state, dispatch, goToStep } = useEditor()
