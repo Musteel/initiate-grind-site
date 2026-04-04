@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { DifficultyBadge, GamePhaseBadge, Badge } from '@/components/ui/badge'
 import { cn, formatSeconds } from '@/lib/utils'
 import { useEditor } from './editor-context'
-import { createDraftPuzzle, submitPuzzleForReview } from '@/lib/actions/puzzles'
+import { createDraftPuzzle, updatePuzzle, submitPuzzleForReview } from '@/lib/actions/puzzles'
 import type { VideoSourceType } from '@/types'
 
 export function StepPreview() {
@@ -27,6 +27,7 @@ export function StepPreview() {
 
     try {
       // Build the input object
+      const parsedPauseAt = state.intro_pause_at !== '' ? parseFloat(state.intro_pause_at.trim()) : NaN
       const input = {
         title:              state.title,
         description:        state.description || undefined,
@@ -34,7 +35,7 @@ export function StepPreview() {
         game_phase:         state.game_phase || undefined,
         intro_video_type:   state.intro_video_type as VideoSourceType,
         intro_video_ref:    state.intro_video_ref,
-        intro_pause_at:     state.intro_pause_at !== '' ? Number(state.intro_pause_at) : undefined,
+        intro_pause_at:     Number.isFinite(parsedPauseAt) ? parsedPauseAt : undefined,
         outcome_video_type: state.outcome_video_type ? state.outcome_video_type as VideoSourceType : undefined,
         outcome_video_ref:  state.outcome_video_ref  || undefined,
         question_text:      state.question_text,
@@ -59,6 +60,10 @@ export function StepPreview() {
         if (!res.success) throw new Error(res.error)
         puzzleId = res.puzzleId
         dispatch({ type: 'SET_SAVED_ID', payload: puzzleId })
+      } else {
+        // Update the existing draft
+        const updateRes = await updatePuzzle(puzzleId, input as any)
+        if (!updateRes.success) throw new Error(updateRes.error)
       }
 
       // Then submit for review

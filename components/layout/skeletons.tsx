@@ -43,9 +43,10 @@ export function PuzzleCardSkeleton() {
 // ─────────────────────────────────────────────────────────────
 
 export function PuzzleGridSkeleton({ count = 6 }: { count?: number }) {
+  const safeCount = Math.max(0, Math.floor(count))
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-      {Array.from({ length: count }).map((_, i) => (
+      {Array.from({ length: safeCount }).map((_, i) => (
         <PuzzleCardSkeleton key={i} />
       ))}
     </div>
@@ -96,18 +97,20 @@ export function LeaderboardSkeleton() {
 // ─────────────────────────────────────────────────────────────
 
 export function TableSkeleton({ rows = 8, cols = 4 }: { rows?: number; cols?: number }) {
+  const safeRows = Math.max(0, Math.floor(rows))
+  const safeCols = Math.max(0, Math.floor(cols))
   const widths = ['w-48', 'w-20', 'w-24', 'w-16', 'w-20']
   return (
     <div className="rounded-xl bg-[#0f1114] border border-white/8 overflow-hidden">
       <div className="px-5 py-3 border-b border-white/6 flex gap-6">
-        {Array.from({ length: cols }).map((_, i) => (
+        {Array.from({ length: safeCols }).map((_, i) => (
           <Bone key={i} className={`h-3.5 ${widths[i % widths.length]}`} />
         ))}
       </div>
       <div className="divide-y divide-white/4">
-        {Array.from({ length: rows }).map((_, i) => (
+        {Array.from({ length: safeRows }).map((_, i) => (
           <div key={i} className="px-5 py-3.5 flex gap-6 items-center">
-            {Array.from({ length: cols }).map((_, j) => (
+            {Array.from({ length: safeCols }).map((_, j) => (
               <Bone key={j} className={`h-4 ${j === 0 ? 'flex-1' : widths[j % widths.length]}`} />
             ))}
           </div>

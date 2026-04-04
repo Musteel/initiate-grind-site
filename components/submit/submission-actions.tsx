@@ -33,8 +33,13 @@ export function SubmissionActions({ puzzleId, slug, status }: SubmissionActionsP
     if (!showConfirm) { setShowConfirm(true); return }
     setLoading(true)
     const res = await deleteDraftPuzzle(puzzleId)
-    if (!res.success) { setError(res.error ?? 'Delete failed'); setLoading(false) }
-    else router.refresh()
+    if (!res.success) {
+      setError(res.error ?? 'Delete failed')
+      setLoading(false)
+    } else {
+      setLoading(false)
+      router.refresh()
+    }
   }
 
   return (

@@ -89,7 +89,12 @@ export async function createDraftPuzzle(
             ...input.mechanic_tags.map((v) => ({ puzzle_id: puzzle.id, tag_type: 'mechanic' as const, tag_value: v })),
         ]
         if (tags.length > 0) {
-            await admin.from('puzzle_tags').insert(tags)
+            const { error: tagsError } = await admin.from('puzzle_tags').insert(tags)
+            if (tagsError) {
+                // Rollback puzzle
+                await admin.from('puzzles').delete().eq('id', puzzle.id)
+                return { success: false, error: tagsError.message }
+            }
         }
 
         revalidatePath('/submissions')
@@ -149,8 +154,13 @@ export async function updatePuzzle(
 
         // Replace options if provided
         if (input.options) {
-            await admin.from('puzzle_options').delete().eq('puzzle_id', puzzleId)
-            await admin.from('puzzle_options').insert(
+            // Delete old options first, then insert new ones with error handling
+            const { error: deleteError } = await admin.from('puzzle_options').delete().eq('puzzle_id', puzzleId)
+            if (deleteError) {
+                return { success: false, error: deleteError.message }
+            }
+
+            const { error: insertError } = await admin.from('puzzle_options').insert(
                 input.options.map((o, i) => ({
                     puzzle_id: puzzleId,
                     label: o.label,
@@ -161,6 +171,9 @@ export async function updatePuzzle(
                     sort_order: o.sort_order ?? i,
                 }))
             )
+            if (insertError) {
+                return { success: false, error: insertError.message }
+            }
         }
 
         // Replace tags if provided
@@ -279,6 +292,17 @@ export async function togglePuzzleVote(
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return { success: false, voted: false, error: 'Not authenticated' }
 
+        // Verify puzzle status
+        const { data: puzzle } = await supabase
+            .from('puzzles')
+            .select('status')
+            .eq('id', puzzleId)
+            .maybeSingle()
+
+        if (!puzzle || puzzle.status !== 'pending_vote') {
+            return { success: false, voted: false, error: 'Puzzle is not available for voting' }
+        }
+
         // Check existing vote
         const { data: existing } = await supabase
             .from('puzzle_votes')
@@ -290,11 +314,11 @@ export async function togglePuzzleVote(
         if (existing) {
             await supabase.from('puzzle_votes').delete()
                 .eq('puzzle_id', puzzleId).eq('user_id', user.id)
-            revalidatePath('/puzzles/submissions')
+            revalidatePath('/submissions')
             return { success: true, voted: false }
         } else {
             await supabase.from('puzzle_votes').insert({ puzzle_id: puzzleId, user_id: user.id })
-            revalidatePath('/puzzles/submissions')
+            revalidatePath('/submissions')
             return { success: true, voted: true }
         }
     } catch (err: any) {

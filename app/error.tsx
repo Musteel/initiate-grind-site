@@ -33,7 +33,7 @@ export default function GlobalError({ error, reset }: ErrorProps) {
             Something went wrong
           </h1>
           <p className="text-slate-500 text-sm">
-            An unexpected error occurred. The team has been notified — try refreshing the page.
+            An unexpected error occurred. Please try refreshing the page.
           </p>
           {error.digest && (
             <p className="text-xs text-slate-700 mt-2 font-mono">

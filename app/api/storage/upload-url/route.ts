@@ -8,6 +8,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 const BUCKET          = 'puzzle-videos'
 const MAX_FILE_SIZE   = 500 * 1024 * 1024  // 500 MB
+// Note: 'video/mov' is included for legacy browser compatibility alongside 'video/quicktime'
 const ALLOWED_TYPES   = ['video/mp4', 'video/webm', 'video/mov', 'video/quicktime', 'video/x-matroska']
 const URL_EXPIRY_SECS = 60 * 5              // 5 minutes to start the upload
 
@@ -62,7 +63,6 @@ export async function POST(request: Request) {
     return NextResponse.json({
       uploadUrl:   data.signedUrl,
       storagePath: data.path,
-      token:       data.token,
     })
   } catch (err: any) {
     console.error('[upload-url] Unhandled:', err)

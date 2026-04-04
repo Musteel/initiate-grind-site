@@ -57,7 +57,7 @@ export function VoteButton({
           (disabled || loading) && 'opacity-50 cursor-not-allowed hover:border-white/10 hover:text-slate-500 hover:bg-transparent'
         )}
       >
-        <ThumbsUp className={cn('w-5 h-5 transition-transform', voted && 'fill-sky-400', loading && 'animate-spin-slow')} />
+        <ThumbsUp className={cn('w-5 h-5 transition-transform', voted && 'fill-sky-400', loading && 'animate-spin')} />
         <span className="font-mono">{count}</span>
       </button>
       {disabled && (

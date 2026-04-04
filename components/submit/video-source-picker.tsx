@@ -82,6 +82,15 @@ export function VideoSourcePicker({
     setUploadState('uploading')
     setUploadProgress(0)
 
+    // Preflight: check file size
+    const maxSize = 500 * 1024 * 1024 // 500 MB
+    if (file.size > maxSize) {
+      setUploadError('File too large: max 500MB')
+      setUploadState('error')
+      setUploadProgress(0)
+      return
+    }
+
     try {
       // 1. Request a signed upload URL from our API
       const res = await fetch('/api/storage/upload-url', {

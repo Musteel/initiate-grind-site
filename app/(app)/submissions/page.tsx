@@ -160,7 +160,7 @@ export default async function SubmissionsPage({
 
                       {puzzle.status === 'pending_vote' && (
                         <span className="text-sky-400">
-                          {puzzle.community_votes}/10 votes needed
+                          {puzzle.community_votes ?? 0}/10 votes needed
                         </span>
                       )}
 
@@ -184,12 +184,12 @@ export default async function SubmissionsPage({
                       <div className="mt-3">
                         <div className="flex justify-between text-xs text-slate-600 mb-1">
                           <span>Community votes</span>
-                          <span>{puzzle.community_votes}/10</span>
+                          <span>{puzzle.community_votes ?? 0}/10</span>
                         </div>
                         <div className="h-1.5 rounded-full bg-slate-800">
                           <div
                             className="h-full rounded-full bg-sky-500 transition-all"
-                            style={{ width: `${Math.min(100, (puzzle.community_votes / 10) * 100)}%` }}
+                            style={{ width: `${Math.min(100, ((puzzle.community_votes ?? 0) / 10) * 100)}%` }}
                           />
                         </div>
                       </div>
