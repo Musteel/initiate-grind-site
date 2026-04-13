@@ -1,4 +1,3 @@
-// components/puzzle/puzzle-sidebar.tsx
 'use client'
 
 import { useState } from 'react'
@@ -9,7 +8,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar, DifficultyBadge, GamePhaseBadge, LevelBadge, Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+//import { Button } from '@/components/ui/button'
 import { cn, formatNumber, formatRelativeTime } from '@/lib/utils'
 import type { PuzzleWithDetails } from '@/lib/supabase'
 
@@ -23,7 +22,6 @@ export function PuzzleSidebar({ puzzle, userId, hasAttempted: initialHasAttempte
   const [liked, setLiked]         = useState(puzzle.user_has_liked ?? false)
   const [likeCount, setLikeCount] = useState(puzzle.upvote_count)
   const [likePending, setLikePending] = useState(false)
-  const [ratingOpen, setRatingOpen]   = useState(false)
   const [reportOpen, setReportOpen]   = useState(false)
   const [hasAttempted] = useState(initialHasAttempted ?? puzzle.user_has_attempted ?? false)
 
@@ -179,7 +177,7 @@ export function PuzzleSidebar({ puzzle, userId, hasAttempted: initialHasAttempte
         </button>
 
         {/* Report */}
-        {userId && (
+        {userId && !reportOpen && (
           <button
             onClick={() => setReportOpen(true)}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-slate-600 hover:text-slate-400 transition-colors"
@@ -227,6 +225,42 @@ function DifficultyRater({ puzzleId, userId }: { puzzleId: string; userId: strin
       user_id: userId,
       rating: r,
     })
+  }
+
+  if (!rating) {
+    return (
+      <div>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-slate-400 bg-white/4 border border-white/6 hover:bg-white/6 hover:text-slate-200 transition-all duration-150"
+        >
+          <Star className="w-4 h-4" />
+          Rate difficulty
+          {open ? <ChevronUp className="w-3.5 h-3.5 ml-auto" /> : <ChevronDown className="w-3.5 h-3.5 ml-auto" />}
+        </button>
+        {open && (
+          <div className="flex gap-2 mt-2 px-1 animate-fade-in-fast">
+            {[
+              { value: 1, label: 'Easy',   color: 'text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10' },
+              { value: 2, label: 'Medium', color: 'text-amber-400 border-amber-500/30 hover:bg-amber-500/10' },
+              { value: 3, label: 'Hard',   color: 'text-red-400 border-red-500/30 hover:bg-red-500/10' },
+            ].map(({ value, label, color }) => (
+              <button
+                key={value}
+                onClick={() => submit(value)}
+                className={cn(
+                  'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors',
+                  'bg-transparent',
+                  color
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    )
   }
 
   if (submitted) {

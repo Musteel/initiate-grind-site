@@ -1,4 +1,3 @@
-// app/(app)/submit/page.tsx
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { Plus } from 'lucide-react'

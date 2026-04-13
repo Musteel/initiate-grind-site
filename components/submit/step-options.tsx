@@ -1,15 +1,14 @@
-// components/submit/step-options.tsx
 'use client'
 
 import { useState } from 'react'
 import {
   Plus, Trash2, CheckCircle2, Circle,
-  ChevronDown, ChevronUp, GripVertical,
+  ChevronDown, ChevronUp, //GripVertical,
 } from 'lucide-react'
 import { VideoSourcePicker } from './video-source-picker'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { useEditor, makeOption } from './editor-context'
+import { useEditor, /*makeOption*/ } from './editor-context'
 import type { VideoSourceType } from '@/lib/supabase'
 
 export function StepOptions() {
@@ -27,8 +26,10 @@ export function StepOptions() {
     if (expandedOption === id) setExpandedOption(null)
   }
 
-  function updateOption(id: string, field: any, value: any) {
-    dispatch({ type: 'UPDATE_OPTION', payload: { id, field, value } })
+  function updateOption(id: string, field: keyof typeof state.options[0], value: string | boolean | undefined) {
+    if (value !== undefined) {
+      dispatch({ type: 'UPDATE_OPTION', payload: { id, field, value } })
+    }
   }
 
   function toggleCorrect(id: string) {
@@ -48,7 +49,7 @@ export function StepOptions() {
       <div className="rounded-xl bg-[#0a0b0d] border border-white/8 p-4 text-sm text-slate-500 space-y-1">
         <p>• Add 2–4 answer options. Exactly one must be marked as correct.</p>
         <p>• Each option can optionally have its own outcome video and explanation.</p>
-        <p>• Write options as actions, not descriptions — e.g. "Push the lane" not "Pushing the lane is correct".</p>
+        <p>• Write options as actions, not descriptions — e.g. &quot;Push the lane&quot; not &quot;Pushing the lane is correct&quot;.</p>
       </div>
 
       {/* Validation state */}

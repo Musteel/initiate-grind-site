@@ -127,7 +127,7 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="rounded-xl bg-[#0f1114] border border-white/8 overflow-hidden divide-y divide-white/4">
-            {recent.map((attempt: any) => (
+            {recent.map((attempt: { id: string; is_correct: boolean; xp_earned: number; attempted_at: string; puzzle: { id: string; slug: string | null; title: string; difficulty: "beginner" | "intermediate" | "advanced" } }) => (
               <Link
                 key={attempt.id}
                 href={`/puzzles/${attempt.puzzle?.slug}`}

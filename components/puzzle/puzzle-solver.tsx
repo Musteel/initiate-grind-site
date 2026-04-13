@@ -1,11 +1,10 @@
-// components/puzzle/puzzle-solver.tsx
 'use client'
 
 import { useState, useCallback } from 'react'
-import { CheckCircle2, XCircle, Zap, Flame, TrendingUp, ChevronRight, RotateCcw } from 'lucide-react'
+import { CheckCircle2, XCircle, Zap, Flame, TrendingUp, ChevronRight, RotateCcw, Link } from 'lucide-react'
 import { VideoPlayer } from './video-player'
 import { Button } from '@/components/ui/button'
-import { DifficultyBadge } from '@/components/ui/badge'
+//import { DifficultyBadge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { recordPuzzleAttempt } from '@/lib/actions/xp'
 import type { PuzzleWithDetails } from '@/lib/supabase'
@@ -260,7 +259,7 @@ export function PuzzleSolver({ puzzle, userId, isPotd = false }: PuzzleSolverPro
             >
               Watch again
             </Button>
-            <a href="/puzzles" className="flex-1">
+            <Link href="/puzzles" className="flex-1">
               <Button
                 variant="brand"
                 size="sm"
@@ -269,7 +268,7 @@ export function PuzzleSolver({ puzzle, userId, isPotd = false }: PuzzleSolverPro
               >
                 Next puzzle
               </Button>
-            </a>
+            </Link>
           </div>
         </div>
       )}

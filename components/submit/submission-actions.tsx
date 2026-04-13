@@ -1,4 +1,3 @@
-// components/submit/submission-actions.tsx
 'use client'
 
 import { useState } from 'react'

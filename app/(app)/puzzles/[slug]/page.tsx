@@ -1,4 +1,3 @@
-// app/(app)/puzzles/[slug]/page.tsx
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { Flame } from 'lucide-react'
@@ -6,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { PuzzleSolver } from '@/components/puzzle/puzzle-solver'
 import { PuzzleSidebar } from '@/components/puzzle/puzzle-sidebar'
 import { DifficultyBadge, GamePhaseBadge } from '@/components/ui/badge'
-import type { PuzzleWithDetails } from '@/lib/supabase/index'
+import type { PuzzleWithDetails } from '@/lib/supabase'
 
 interface PageProps {
   params: Promise<{ slug: string }>

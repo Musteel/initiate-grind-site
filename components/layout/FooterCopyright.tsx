@@ -5,7 +5,7 @@ export function FooterCopyright() {
 
   return (
     <>
-      © {year} Deadlock Trainer · Community project · Not affiliated with Valve
+      © {year} Initiate Grind · Community project · Vibecode Slop ·  Not affiliated with Valve
     </>
   )
 }

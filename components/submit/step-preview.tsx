@@ -1,4 +1,3 @@
-// components/submit/step-preview.tsx
 'use client'
 
 import { useState } from 'react'
@@ -27,7 +26,7 @@ export function StepPreview() {
 
     try {
       // Build the input object
-      const parsedPauseAt = state.intro_pause_at !== '' ? parseFloat(state.intro_pause_at.trim()) : NaN
+      const parsedPauseAt = state.intro_pause_at !== '' ? parseFloat(String(state.intro_pause_at).trim()) : NaN
       const input = {
         title:              state.title,
         description:        state.description || undefined,
@@ -56,13 +55,13 @@ export function StepPreview() {
 
       if (!puzzleId) {
         // Create the draft first
-        const res = await createDraftPuzzle(input as any)
+        const res = await createDraftPuzzle(input)
         if (!res.success) throw new Error(res.error)
         puzzleId = res.puzzleId
         dispatch({ type: 'SET_SAVED_ID', payload: puzzleId })
       } else {
         // Update the existing draft
-        const updateRes = await updatePuzzle(puzzleId, input as any)
+        const updateRes = await updatePuzzle(puzzleId, input)
         if (!updateRes.success) throw new Error(updateRes.error)
       }
 
@@ -72,8 +71,9 @@ export function StepPreview() {
 
       // Done — redirect to submissions
       router.push('/submissions?submitted=1')
-    } catch (err: any) {
-      setSubmitErr(err?.message ?? 'Something went wrong. Please try again.')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      setSubmitErr(errorMessage)
     } finally {
       setSaving(false)
     }
@@ -93,7 +93,7 @@ export function StepPreview() {
       <div className="rounded-xl bg-[#0f1114] border border-white/8 p-5 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <DifficultyBadge difficulty={state.difficulty} />
-          {state.game_phase && <GamePhaseBadge phase={state.game_phase as any} />}
+          {state.game_phase && <GamePhaseBadge phase={state.game_phase} />}
         </div>
         <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>
           {state.title}
@@ -137,7 +137,7 @@ export function StepPreview() {
       {/* Options */}
       <div className="space-y-2">
         <p className="text-xs text-slate-600 uppercase tracking-wider font-medium">Answer options</p>
-        {state.options.map((o, i) => (
+        {state.options.map((o, /*i*/) => (
           <div
             key={o.id}
             className={cn(

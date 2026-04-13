@@ -50,12 +50,12 @@ async function getTodaysPotd(userId?: string): Promise<PuzzleWithDetails | null>
 
   return {
     ...data,
-    creator:            data.creator as any,
-    options:            (data.options as any[]).sort((a, b) => a.sort_order - b.sort_order),
-    tags:               data.tags as any[],
+    creator:            data.creator,
+    options:            (data.options || []).sort((a, b) => a.sort_order - b.sort_order),
+    tags:               data.tags || [],
     user_has_liked:     userHasLiked,
     user_has_attempted: userHasAttempted,
-  }
+  } as PuzzleWithDetails
 }
 
 export default async function PotdPage() {

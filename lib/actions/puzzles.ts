@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+//import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { PuzzleCreateInput } from '@/lib/supabase'
@@ -99,8 +99,9 @@ export async function createDraftPuzzle(
 
         revalidatePath('/submissions')
         return { success: true, puzzleId: puzzle.id, slug: puzzle.slug ?? undefined }
-    } catch (err: any) {
-        return { success: false, error: err?.message ?? 'Unknown error' }
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Unknown error'
+        return { success: false, error: message }
     }
 }
 
@@ -214,8 +215,9 @@ export async function updatePuzzle(
 
         revalidatePath(`/submissions`)
         return { success: true, puzzleId }
-    } catch (err: any) {
-        return { success: false, error: err?.message ?? 'Unknown error' }
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Unknown error'
+        return { success: false, error: message }
     }
 }
 
@@ -249,9 +251,9 @@ export async function submitPuzzleForReview(
         if (!puzzle) return { success: false, error: 'Puzzle not found' }
 
         // Validate: must have at least one correct option
-        const options = (puzzle as any).options ?? []
+        const options = (puzzle as { id: string; options: Array<{ id: string; is_correct: boolean }> }).options ?? []
         if (options.length < 2) return { success: false, error: 'Puzzle must have at least 2 options' }
-        if (!options.some((o: any) => o.is_correct)) {
+        if (!options.some((o: { id: string; is_correct: boolean }) => o.is_correct)) {
             return { success: false, error: 'At least one option must be marked correct' }
         }
 
@@ -279,8 +281,9 @@ export async function submitPuzzleForReview(
         revalidatePath('/submissions')
         revalidatePath('/admin/submissions')
         return { success: true, puzzleId }
-    } catch (err: any) {
-        return { success: false, error: err?.message ?? 'Unknown error' }
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Unknown error'
+        return { success: false, error: message }
     }
 }
 
@@ -317,8 +320,9 @@ export async function deleteDraftPuzzle(
 
         revalidatePath('/submissions')
         return { success: true }
-    } catch (err: any) {
-        return { success: false, error: err?.message ?? 'Unknown error' }
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Unknown error'
+        return { success: false, error: message }
     }
 }
 
@@ -374,7 +378,8 @@ export async function togglePuzzleVote(
         // Successfully inserted vote
         revalidatePath('/submissions')
         return { success: true, voted: true }
-    } catch (err: any) {
-        return { success: false, voted: false, error: err?.message ?? 'Unknown error' }
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Unknown error'
+        return { success: false, voted: false, error: message }
     }
 }

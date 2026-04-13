@@ -1,4 +1,3 @@
-// components/submit/video-source-picker.tsx
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
@@ -131,9 +130,9 @@ export function VideoSourcePicker({
       setUploadState('done')
       setUploadProgress(100)
       onSourceChange('storage', storagePath)
-    } catch (err: any) {
+    } catch (err: unknown) {
       setUploadState('error')
-      setUploadError(err?.message ?? 'Upload failed')
+      setUploadError(err instanceof Error ? err.message : 'Upload failed')
     }
   }, [onSourceChange])
 

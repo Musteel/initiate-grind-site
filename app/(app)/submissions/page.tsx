@@ -1,4 +1,3 @@
-// app/(app)/submissions/page.tsx
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -11,6 +10,7 @@ import { DifficultyBadge } from '@/components/ui/badge'
 import { formatRelativeTime } from '@/lib/utils'
 import type { PuzzleStatus } from '@/lib/supabase'
 import { SubmissionActions } from '@/components/submit/submission-actions'
+import type { DifficultyLevel } from '@/lib/supabase'
 
 export const metadata: Metadata = { title: 'My submissions' }
 
@@ -146,7 +146,7 @@ export default async function SubmissionsPage({
                         {config.icon}
                         {config.label}
                       </span>
-                      <DifficultyBadge difficulty={puzzle.difficulty as any} />
+                      <DifficultyBadge difficulty={puzzle.difficulty as DifficultyLevel} />
                     </div>
 
                     {/* Title */}
