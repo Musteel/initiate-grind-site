@@ -1,4 +1,3 @@
-// app/api/storage/upload-url/route.ts
 // Returns a short-lived signed upload URL for puzzle video files.
 // Client uploads directly to Supabase Storage — never through the Next.js server.
 
@@ -10,7 +9,7 @@ const BUCKET          = 'puzzle-videos'
 const MAX_FILE_SIZE   = 500 * 1024 * 1024  // 500 MB
 // Note: 'video/mov' is included for legacy browser compatibility alongside 'video/quicktime'
 const ALLOWED_TYPES   = ['video/mp4', 'video/webm', 'video/mov', 'video/quicktime', 'video/x-matroska']
-const URL_EXPIRY_SECS = 60 * 5              // 5 minutes to start the upload
+//const URL_EXPIRY_SECS = 60 * 5              // 5 minutes to start the upload
 
 export async function POST(request: Request) {
   try {
@@ -22,10 +21,10 @@ export async function POST(request: Request) {
     }
 
     // Parse and validate request body
-    let body: any
+    let body: Record<string, unknown>
     try {
       body = await request.json()
-    } catch (parseError) {
+    } catch {
       return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
     }
 
@@ -42,7 +41,7 @@ export async function POST(request: Request) {
     }
 
     // Validate fileSize
-    if (!Number.isFinite(fileSize) || fileSize <= 0) {
+    if (typeof fileSize !== 'number' || !Number.isFinite(fileSize) || fileSize <= 0) {
       return NextResponse.json({ error: 'fileSize must be a finite positive number' }, { status: 400 })
     }
 
@@ -78,7 +77,7 @@ export async function POST(request: Request) {
       uploadUrl:   data.signedUrl,
       storagePath: data.path,
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[upload-url] Unhandled:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

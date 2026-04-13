@@ -1,4 +1,3 @@
-// components/submit/puzzle-editor.tsx
 'use client'
 
 import { Check } from 'lucide-react'
@@ -43,7 +42,7 @@ function StepIndicator() {
           <div key={step.number} className="flex items-center flex-1 last:flex-none">
             <button
               type="button"
-              onClick={() => reachable && goToStep(step.number as any)}
+              onClick={() => reachable && goToStep(step.number as 1 | 2 | 3 | 4)}
               disabled={!reachable}
               className={cn(
                 'flex flex-col items-center gap-1.5 group transition-all',

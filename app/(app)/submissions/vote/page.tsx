@@ -1,10 +1,24 @@
-// app/(app)/submissions/vote/page.tsx
 import type { Metadata } from 'next'
 import { BarChart2, Info } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { DifficultyBadge, Avatar } from '@/components/ui/badge'
 import { formatRelativeTime } from '@/lib/utils'
 import { VoteButton } from '@/components/submit/vote-button'
+
+type Puzzle = {
+  id: string
+  title: string
+  description: string | null
+  difficulty: "beginner" | "intermediate" | "advanced"
+  game_phase: "early" | "mid" | "late" | null
+  community_votes: number
+  created_at: string
+  creator: {
+    username: string
+    display_name: string | null
+    avatar_url: string | null
+  } | null
+}
 
 export const metadata: Metadata = { title: 'Vote on submissions' }
 
@@ -24,7 +38,7 @@ export default async function VotePage() {
     .limit(50)
 
   // Get current user's votes for these puzzles
-  let userVotedIds = new Set<string>()
+  const userVotedIds = new Set<string>()
   if (user && pendingPuzzles?.length) {
     const { data: votes } = await supabase
       .from('puzzle_votes')
@@ -63,7 +77,7 @@ export default async function VotePage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {pendingPuzzles.map((puzzle: any) => (
+          {pendingPuzzles.map((puzzle: Puzzle) => (
             <div
               key={puzzle.id}
               className="rounded-xl bg-[#0f1114] border border-white/8 p-5 flex flex-col sm:flex-row sm:items-start gap-4"

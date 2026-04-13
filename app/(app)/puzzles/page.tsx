@@ -1,11 +1,10 @@
-// app/(app)/puzzles/page.tsx
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Search, Flame, Users, Heart, ArrowRight, SlidersHorizontal } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { DifficultyBadge, GamePhaseBadge, Badge } from '@/components/ui/badge'
 import { formatNumber, PAGE_SIZE, getPaginationRange } from '@/lib/utils'
-import type { DifficultyLevel, GamePhase } from '@/lib/supabase/index'
+import type { DifficultyLevel, GamePhase } from '@/lib/supabase'
 
 export const metadata: Metadata = { title: 'Puzzles' }
 
@@ -52,15 +51,16 @@ async function getPuzzles(filters: Awaited<PageProps['searchParams']>) {
 
   // Filter by hero/mechanic tag (done in-memory after fetch since Supabase
   // doesn't easily support nested foreign-table filters in .eq)
-  let filtered = (data ?? []) as any[]
+
+  let filtered = (data ?? []) as Puzzle[]
   if (filters.hero) {
-    filtered = filtered.filter((p: any) =>
-      p.tags.some((t: any) => t.tag_type === 'hero' && t.tag_value === filters.hero)
+    filtered = filtered.filter((p) =>
+      p.tags.some((t) => t.tag_type === 'hero' && t.tag_value === filters.hero)
     )
   }
   if (filters.mechanic) {
-    filtered = filtered.filter((p: any) =>
-      p.tags.some((t: any) => t.tag_type === 'mechanic' && t.tag_value === filters.mechanic)
+    filtered = filtered.filter((p) =>
+      p.tags.some((t) => t.tag_type === 'mechanic' && t.tag_value === filters.mechanic)
     )
   }
 
@@ -188,7 +188,7 @@ export default async function PuzzlesPage({ searchParams }: PageProps) {
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                {puzzles.map((puzzle: any) => (
+                {puzzles.map((puzzle) => (
                   <PuzzleCard key={puzzle.id} puzzle={puzzle} />
                 ))}
               </div>
@@ -257,8 +257,23 @@ function FilterLink({ href, active, children }: { href: string; active: boolean;
   )
 }
 
-function PuzzleCard({ puzzle }: { puzzle: any }) {
-  const heroTags = puzzle.tags.filter((t: any) => t.tag_type === 'hero').slice(0, 2)
+interface Puzzle {
+  id: string
+  slug: string
+  title: string
+  difficulty: DifficultyLevel
+  game_phase: GamePhase | null
+  solve_count: number
+  upvote_count: number
+  avg_difficulty: number
+  is_potd: boolean
+  created_at: string
+  creator: { username: string; display_name: string | null; avatar_url: string | null } | null
+  tags: Array<{ id: string; tag_type: string; tag_value: string }>
+}
+
+function PuzzleCard({ puzzle }: { puzzle: Puzzle }) {
+  const heroTags = puzzle.tags.filter((t) => t.tag_type === 'hero').slice(0, 2)
 
   return (
     <Link
@@ -289,7 +304,7 @@ function PuzzleCard({ puzzle }: { puzzle: any }) {
 
         {heroTags.length > 0 && (
           <div className="flex gap-1.5 mb-3">
-            {heroTags.map((t: any) => (
+            {heroTags.map((t: { id: string; tag_type: string; tag_value: string }) => (
               <Badge key={t.id} variant="ghost" size="sm">{t.tag_value}</Badge>
             ))}
           </div>

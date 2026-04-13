@@ -1,4 +1,3 @@
-// components/submit/vote-button.tsx
 'use client'
 
 import { useState } from 'react'

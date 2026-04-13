@@ -128,9 +128,9 @@ export async function recordPuzzleAttempt(input: {
       success: true,
       result: { xpEarned, newStreak, levelUp, newLevel },
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[recordPuzzleAttempt]', err)
-    return { success: false, error: err?.message ?? 'Unknown error' }
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
   }
 }
 
@@ -140,13 +140,8 @@ export async function recordPuzzleAttempt(input: {
 export async function incrementPuzzleView(puzzleId: string) {
   try {
     const admin = createAdminClient()
-    await admin
-      .from('puzzles')
-      .update({ view_count: admin.rpc('', {}) }) // Use raw SQL increment
-      .eq('id', puzzleId)
-
-    // Simpler: direct SQL
-    await admin.rpc('increment_view_count' as any, { p_puzzle_id: puzzleId }).throwOnError()
+    // Use RPC function to increment view count
+    await admin.rpc('increment_view_count', { p_puzzle_id: puzzleId }).throwOnError()
   } catch {
     // Silently ignore — view count is non-critical
   }

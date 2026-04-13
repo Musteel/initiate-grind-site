@@ -1,4 +1,3 @@
-// components/submit/step-video.tsx
 'use client'
 
 //import { useState } from 'react'
@@ -85,7 +84,7 @@ export function StepVideo() {
         placeholder="Explain the reasoning behind the correct answer in depth. This is shown after the player makes their choice."
         maxLength={2000}
         hint={`${state.explanation.length}/2000`}
-        className="min-h-[120px]"
+        className="min-h-[30px]"
       />
 
       {/* Shared outcome video */}

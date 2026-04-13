@@ -1,8 +1,7 @@
-// components/puzzle/video-player.tsx
 'use client'
 
 import { useEffect, useRef, useCallback, useState } from 'react'
-import { Play, Loader2 } from 'lucide-react'
+import { /*Play*/ Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { VideoSourceType } from '@/lib/supabase'
 
@@ -18,10 +17,19 @@ interface VideoPlayerProps {
 
 declare global {
   interface Window {
-    YT: any
-    onYouTubeIframeAPIReady: () => void
-    Twitch: any
+    YT?: {
+      Player: new (element: HTMLElement, options: Record<string, unknown>) => YouTubePlayerInstance
+      PlayerState: Record<string, number>
+    }
+    onYouTubeIframeAPIReady?: () => void
+    Twitch?: Record<string, unknown>
   }
+}
+
+interface YouTubePlayerInstance {
+  getCurrentTime: () => number
+  pauseVideo: () => void
+  destroy: () => void
 }
 
 // ============================================================
@@ -41,7 +49,7 @@ function YouTubePlayer({
   onEnded?: () => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const playerRef    = useRef<any>(null)
+  const playerRef    = useRef<YouTubePlayerInstance | null>(null)
   const intervalRef  = useRef<ReturnType<typeof setInterval> | null>(null)
   const pauseFiredRef = useRef(false)
   const [ready, setReady] = useState(false)
@@ -72,7 +80,7 @@ function YouTubePlayer({
     let isMounted = true
 
     function initPlayer() {
-      if (!containerRef.current || !isMounted) return
+      if (!containerRef.current || !isMounted || !window.YT?.Player) return
       playerRef.current = new window.YT.Player(containerRef.current, {
         videoId,
         playerVars: {
@@ -85,7 +93,7 @@ function YouTubePlayer({
           onReady: () => {
             if (isMounted) setReady(true)
           },
-          onStateChange: (e: any) => {
+          onStateChange: (e: { data: number }) => {
             // YT.PlayerState.PLAYING = 1
             if (e.data === 1) startPoller()
             // YT.PlayerState.ENDED = 0
@@ -111,7 +119,7 @@ function YouTubePlayer({
       }
       const prev = window.onYouTubeIframeAPIReady
       window.onYouTubeIframeAPIReady = () => {
-        prev?.()
+        if (prev) prev()
         initPlayer()
       }
     }
@@ -140,7 +148,7 @@ function YouTubePlayer({
 // ============================================================
 function TwitchPlayer({
   clipSlug,
-  onEnded,
+  //onEnded,
 }: {
   clipSlug: string
   onEnded?: () => void

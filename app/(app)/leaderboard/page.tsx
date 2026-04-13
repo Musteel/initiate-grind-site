@@ -1,4 +1,3 @@
-// app/(app)/leaderboard/page.tsx
 import type { Metadata } from 'next'
 import { Trophy, Flame, Zap, Medal } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
@@ -7,6 +6,16 @@ import { formatXp } from '@/lib/utils'
 import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Leaderboard' }
+
+interface Player {
+  id: string
+  username: string
+  display_name: string | null
+  avatar_url: string | null
+  xp: number
+  level: number
+  streak: number
+}
 
 async function getLeaderboard() {
   const supabase = await createClient()
@@ -137,7 +146,7 @@ function PodiumCard({
   userId,
   tall = false,
 }: {
-  player: any
+  player: Player
   rank: number
   colorClass: string
   rankIcon: string

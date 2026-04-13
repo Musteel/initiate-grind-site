@@ -1,4 +1,3 @@
-// components/submit/editor-context.tsx
 'use client'
 
 import {
@@ -59,11 +58,11 @@ export interface EditorState {
 type EditorAction =
   | { type: 'SET_STEP';         payload: 1 | 2 | 3 | 4 }
   | { type: 'SET_SAVED_ID';     payload: string }
-  | { type: 'SET_FIELD';        payload: { field: keyof EditorState; value: any } }
+  | { type: 'SET_FIELD';        payload: { field: keyof EditorState; value: string | number | boolean | string[] | VideoSourceType | GamePhase | null } }
   | { type: 'SET_HERO_TAGS';    payload: string[] }
   | { type: 'SET_MECHANIC_TAGS'; payload: string[] }
   | { type: 'ADD_OPTION' }
-  | { type: 'UPDATE_OPTION';    payload: { id: string; field: keyof OptionDraft; value: any } }
+  | { type: 'UPDATE_OPTION';    payload: { id: string; field: keyof OptionDraft; value: string | boolean | VideoSourceType | undefined } }
   | { type: 'REMOVE_OPTION';    payload: string }
   | { type: 'REORDER_OPTIONS';  payload: OptionDraft[] }
   | { type: 'SET_SUBMITTING';   payload: boolean }
@@ -155,7 +154,7 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
 interface EditorContextValue {
   state:    EditorState
   dispatch: React.Dispatch<EditorAction>
-  setField: (field: keyof EditorState, value: any) => void
+  setField: (field: keyof EditorState, value: string | number | boolean | string[] | VideoSourceType | GamePhase | null) => void
   goToStep: (step: 1 | 2 | 3 | 4) => void
   // Derived helpers
   isStep1Valid: boolean
@@ -168,7 +167,7 @@ const EditorContext = createContext<EditorContextValue | null>(null)
 export function EditorProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
 
-  const setField = useCallback((field: keyof EditorState, value: any) => {
+  const setField = useCallback((field: keyof EditorState, value: string | number | boolean | string[] | VideoSourceType | GamePhase | null) => {
     dispatch({ type: 'SET_FIELD', payload: { field, value } })
   }, [])
 
