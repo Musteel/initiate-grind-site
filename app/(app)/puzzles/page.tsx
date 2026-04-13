@@ -51,20 +51,6 @@ async function getPuzzles(filters: Awaited<PageProps['searchParams']>) {
 
   // Filter by hero/mechanic tag (done in-memory after fetch since Supabase
   // doesn't easily support nested foreign-table filters in .eq)
-  interface Puzzle {
-    id: string
-    slug: string
-    title: string
-    difficulty: DifficultyLevel
-    game_phase: GamePhase
-    solve_count: number
-    upvote_count: number
-    avg_difficulty: number
-    is_potd: boolean
-    created_at: string
-    creator: { username: string; display_name: string; avatar_url: string } | null
-    tags: Array<{ id: string; tag_type: string; tag_value: string }>
-  }
 
   let filtered = (data ?? []) as Puzzle[]
   if (filters.hero) {
@@ -276,13 +262,13 @@ interface Puzzle {
   slug: string
   title: string
   difficulty: DifficultyLevel
-  game_phase: GamePhase
+  game_phase: GamePhase | null
   solve_count: number
   upvote_count: number
   avg_difficulty: number
   is_potd: boolean
   created_at: string
-  creator: { username: string; display_name: string; avatar_url: string } | null
+  creator: { username: string; display_name: string | null; avatar_url: string | null } | null
   tags: Array<{ id: string; tag_type: string; tag_value: string }>
 }
 

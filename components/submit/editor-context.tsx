@@ -62,7 +62,7 @@ type EditorAction =
   | { type: 'SET_HERO_TAGS';    payload: string[] }
   | { type: 'SET_MECHANIC_TAGS'; payload: string[] }
   | { type: 'ADD_OPTION' }
-  | { type: 'UPDATE_OPTION';    payload: { id: string; field: keyof OptionDraft; value: string | boolean | VideoSourceType } }
+  | { type: 'UPDATE_OPTION';    payload: { id: string; field: keyof OptionDraft; value: string | boolean | VideoSourceType | undefined } }
   | { type: 'REMOVE_OPTION';    payload: string }
   | { type: 'REORDER_OPTIONS';  payload: OptionDraft[] }
   | { type: 'SET_SUBMITTING';   payload: boolean }

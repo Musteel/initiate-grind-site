@@ -5,7 +5,7 @@ export function FooterCopyright() {
 
   return (
     <>
-      © {year} Initiate Grind · Community project · Vibecode Slop ·  Not affiliated with Valve
+      © {year} Initiate Grind · Community project · Vibecode Slop · Not affiliated with Valve
     </>
   )
 }

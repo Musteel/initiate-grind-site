@@ -27,9 +27,7 @@ export function StepOptions() {
   }
 
   function updateOption(id: string, field: keyof typeof state.options[0], value: string | boolean | undefined) {
-    if (value !== undefined) {
-      dispatch({ type: 'UPDATE_OPTION', payload: { id, field, value } })
-    }
+    dispatch({ type: 'UPDATE_OPTION', payload: { id, field, value } })
   }
 
   function toggleCorrect(id: string) {

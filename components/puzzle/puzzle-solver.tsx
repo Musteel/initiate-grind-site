@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { CheckCircle2, XCircle, Zap, Flame, TrendingUp, ChevronRight, RotateCcw, Link } from 'lucide-react'
+import { CheckCircle2, XCircle, Zap, Flame, TrendingUp, ChevronRight, RotateCcw } from 'lucide-react'
+import Link from 'next/link'
 import { VideoPlayer } from './video-player'
 import { Button } from '@/components/ui/button'
 //import { DifficultyBadge } from '@/components/ui/badge'

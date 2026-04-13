@@ -17,12 +17,12 @@ interface VideoPlayerProps {
 
 declare global {
   interface Window {
-    YT: {
+    YT?: {
       Player: new (element: HTMLElement, options: Record<string, unknown>) => YouTubePlayerInstance
       PlayerState: Record<string, number>
     }
-    onYouTubeIframeAPIReady: () => void
-    Twitch: Record<string, unknown>
+    onYouTubeIframeAPIReady?: () => void
+    Twitch?: Record<string, unknown>
   }
 }
 
@@ -80,7 +80,7 @@ function YouTubePlayer({
     let isMounted = true
 
     function initPlayer() {
-      if (!containerRef.current || !isMounted) return
+      if (!containerRef.current || !isMounted || !window.YT?.Player) return
       playerRef.current = new window.YT.Player(containerRef.current, {
         videoId,
         playerVars: {
@@ -119,7 +119,7 @@ function YouTubePlayer({
       }
       const prev = window.onYouTubeIframeAPIReady
       window.onYouTubeIframeAPIReady = () => {
-        prev?.()
+        if (prev) prev()
         initPlayer()
       }
     }
