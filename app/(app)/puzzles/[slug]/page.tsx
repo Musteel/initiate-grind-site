@@ -7,6 +7,8 @@ import { PuzzleSidebar } from '@/components/puzzle/puzzle-sidebar'
 import { DifficultyBadge, GamePhaseBadge } from '@/components/ui/badge'
 import type { PuzzleWithDetails } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 interface PageProps {
   params: Promise<{ slug: string }>
 }
